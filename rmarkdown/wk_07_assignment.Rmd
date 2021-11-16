@@ -1,7 +1,7 @@
 ---
 title: "Week 7 Assignment - Solutions"
 author: "Jose Luis Rodriguez Gil"
-date: "28/10/2020"
+date: "28/10/2021"
 output: 
   html_document:
     keep_md: true
@@ -51,7 +51,7 @@ First we start with the chlorophyll a plot. As mentioned in the instructions, we
 
 chll_a_plot <- chll_a %>% 
   clean_names() %>% 
-  filter(sample_depth_m == 0) %>% 
+  filter(sample_depth_m == 0) %>% # Needed because we want de data for the SURFACE
   ggplot() +
   
   #Main plotting elements
@@ -79,7 +79,7 @@ Now we create the phosphorus. As mentioned in the instructions, we want to creat
 
 p_plot <- phosphorus %>% 
   clean_names() %>% 
-  filter(sample_depth_m == 0) %>% 
+  filter(sample_depth_m == 0) %>% # Needed because we want de data for the SURFACE
   ggplot() +
   
   #Main plotting elements
