@@ -1,0 +1,123 @@
+---
+title: "Week 7 Assignment - Solutions"
+author: "Jose Luis Rodriguez Gil"
+date: "28/10/2020"
+output: 
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load packages, include=FALSE}
+
+library(tidyverse)
+library(janitor)
+library(here)
+library(viridis)
+library(lubridate)
+library(patchwork)
+
+```
+
+I have previously created my theme as a function in a separate r script file (`.R`) which has been saved in the `fucntions` folder. We need to source this function so it is available for us to use.
+
+Feel free to go check the `.R` file to see how i created my Theme. I actually started from scratch instead of modifying an existing one, so i specified the values i wanted for all possible parameters.
+
+```{r source theme function}
+
+source(here("functions", "theme_pepe.R"))
+
+```
+
+We load the two data sets we are going to use for this execise. One containing the chlorophyll a data and the other with the phosphorus measurements. All data collected at **FortWhite Alive** and available [here](http://lwbin-datahub.ad.umanitoba.ca/dataset/fortwhyte-alive-model-watershed-project)
+
+```{r load data}
+
+chll_a <- read_csv(here("data", "chlorophyll_a.csv"))
+phosphorus <- read_csv(here("data", "phosphorus_profiles.csv"))
+
+```
+
+# Plots
+
+## Chlorophyll a plot
+
+First we start with the chlorophyll a plot. As mentioned in the instructions, we want to create a summary plot of cholorophyll concentrations in the surface of the different lakes using the theme we have created. In this case, i am using a violin plot with a `geom_gitter()` to show the actual data.
+
+```{r chll_a_plot}
+
+chll_a_plot <- chll_a %>% 
+  clean_names() %>% 
+  filter(sample_depth_m == 0) %>% 
+  ggplot() +
+  
+  #Main plotting elements
+  geom_violin(aes(x = lake_name, y = chlorophyll_concentration_ug_l), color = "white", fill = NA) +
+  geom_jitter(aes(x = lake_name, y = chlorophyll_concentration_ug_l), color = "white", alpha = 0.5, width = 0.1, height = 0) +
+  
+  #scales
+  # scale_y_log10() +
+  # annotation_logticks(sides = "l", color = "white") +
+  
+  #theme and formatting
+  theme_pepe() +
+  labs(x = NULL,
+       y = expression(Chlorophyll~a~concentration~(mu*g~.~L^{-1})))
+
+print(chll_a_plot)
+
+``` 
+
+## Phosphorus plot
+
+Now we create the phosphorus. As mentioned in the instructions, we want to create a summary plot of total phosphorus concentrations in the surface of the different lakes using the theme we have created. In this case, i am using a violin plot with a `geom_gitter()` to show the actual data.
+
+```{r p_plot}
+
+p_plot <- phosphorus %>% 
+  clean_names() %>% 
+  filter(sample_depth_m == 0) %>% 
+  ggplot() +
+  
+  #Main plotting elements
+  geom_violin(aes(x = lake_name, y = total_phosphorus_mg_l), color = "white", fill = NA) +
+  geom_jitter(aes(x = lake_name, y = total_phosphorus_mg_l), color = "white", alpha = 0.5, width = 0.1, height = 0) +
+  
+  # Scales
+  # scale_y_log10() +
+  # annotation_logticks(sides = "l", color = "white") +
+
+  #Theme and formating
+  theme_pepe() +
+    labs(x = NULL,
+       y = expression(Total~phosphorus~(m*g~.~L^{-1})))
+
+print(p_plot)
+
+```
+
+## Combined plot
+
+Finally, we are going to use the`{patchwork}` package to create a combined plot.
+
+```{r combined_plot}
+
+combined_plot <- chll_a_plot + p_plot +
+  plot_layout(ncol = 1) +                  # We specify that we want them one on top of the other
+    plot_annotation(tag_levels = "A") &    # We add the panel annotation so they can be referenced in the figure caption
+  theme_pepe()                             # Using the `&` we can apply the theme also to the combined plot, 
+                                           # this is needed to ensure my dark background is mainatined in the combined plot background
+
+print(combined_plot)
+
+ggsave(here("figures", "combined_plot.pdf"), combined_plot,
+       width = 190, height = 140, units = "mm") 
+
+ggsave(here("figures", "combined_plot.png"), combined_plot,
+       width = 10, height = 7, units = "in") # i am saving a .png copy so i could embed it in the README.md
+
+```
+
